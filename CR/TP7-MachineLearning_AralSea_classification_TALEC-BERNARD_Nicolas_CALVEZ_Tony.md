@@ -317,7 +317,7 @@ displayFeatures3d(featLearn, labels)
 
 **<u>Variation des parametres de Kmeans :</u>**
 
-* NbClusters : Lorsqu’on augmente le nombres de classes, on augmente le nombres de couleurs sur le graphique mais pour notre application, le nombres de 2 est suffisant.
+* NbClusters : Lorsqu’on augmente le nombres de classes, on augmente le nombres de couleurs sur le graphique, nous avons fait ici avec deux classes mais nous allons voir que si on augmente ce nombre les resultats peuvent etre plus precis. 
 
 * Le nombre d’essai pour une valeur de 1, a pour effet de retourner des valeurs erronées quand les centroides initiaux sont mauvais.
 * Le nombre d’itérations à pour effet de laisser de définir de mauvaises limites entres les classes quand il est trop petit.
@@ -353,15 +353,9 @@ Implementation dans `aralsea_main.py`:
 
 # mise en forme de l'image de 1973 et 1987 en matrice Num Pixels / Val Pixels
 # ------------------------------------------------
-n_img73 = np.zeros([img73.shape[0] * img73.shape[1], 3])
-for i in range(0, 2):
-    n_img73[:, i] = img73[:, :, i].flatten()
-#print(n_img73)
-
-n_img87 = np.zeros([img87.shape[0] * img87.shape[1], 3])
-for i in range(0, 2):
-    n_img87[:, i] = img87[:, :, i].flatten()
-#print(n_img73)
+n_img73, nbre_pixels_image73, nbr_couche_image73 = selectFeatureVectors(img73,1)
+n_img87, nbre_pixels_image87, nbr_couche_image87 = selectFeatureVectors(img87,1)
+# ------------------------------------------------
 # ------------------------------------------------
 ```
 
@@ -420,7 +414,7 @@ print('evolution de la surface: ', evo_surface, "%")
 # ------------------------------------------------
 ```
 
-Ici nous calculons le nombre de pixels de la classe representant le lac entre 1973 et 1987, puis nous en deduisons l'évolution de la surface. Elle est approximativement de 20.97 %.
+Ici nous calculons le nombre de pixels de la classe representant le lac entre 1973 et 1987, puis nous en deduisons l'évolution de la surface. Elle est approximativement de 24.74 %.
 
 
 
@@ -428,11 +422,13 @@ Ici nous calculons le nombre de pixels de la classe representant le lac entre 19
 
 *Analyser en fonction des parametres du kmeans et du mode de codage des couleurs la creation de classe dans l’espace des descripteurs et donner l’impact que cela a sur le pourcentage estime ?*
 
-Si nous considerons 3 classes, l’evolution de la mer est de 23,64 %.
+Si nous considerons 3 classes, l’evolution de la mer est de 25.05 %.
 
-Si nous considerons 4 classes, l’evolution de la mer est de 25.25 %.
+Si nous considerons 4 classes, l’evolution de la mer est de 24.82 %.
 
 Lorsque les paramètres de la fonction Kmeans évoluent, le résultat final évolu aussi, la définiton du nombres de classes est le point le plus important de la fonction, c’est le paramètre qui a le plus d’impact sur le résultat.
+
+Il est peut-etre donc dans notre cas plus interessant de choisir 3 classes.
 
 
 
@@ -452,11 +448,55 @@ Les données sont générées à partir d’échantillons provenant de K différ
 
 
 
+Contenu de la focntion `unsupervisedTraining()` :
+
+```python
+def unsupervisedTraining(featLearn, method):
+    ''' apprentissage avec la fonction KMeans() et GaussianMixture 
+    de scikit-learn :
+    - featLearn est la matrice de l'ensemble d'apprentissage
+    - method: type d'algorithme de Machine Learning utilisé (KMeans et GaussianMixture) 
+    - nbCluster est le nombre de cluster = nombre de classes rentré par l'utilisateur en début de fonction
+    - renvoie model: le modèle de classement ou classifieur
+    '''
+
+    # fixer le nombre de classes
+    global model
+    answer = input('nombre de classes:')
+    nbCluster = int(answer)
+
+    if method == 'kmeans':
+        init = 'random'
+        n_init = 10
+        max_iter = 300
+
+        model = KMeans(nbCluster, init, n_init, max_iter).fit(featLearn)
+
+    elif method == 'gmm':
+        model = GaussianMixture(nbCluster).fit(featLearn)
+
+    return model
+```
 
 
 
+Implementation dans le  `aralsea_main.py` :
+
+```python
+model = unsupervisedTraining(featLearn, 'gmm')
+```
+
+Nous avons ici fait le test avec 3 clusters:
+
+| displayFeature2D                                             | displayFeature3D                   |
+| ------------------------------------------------------------ | ---------------------------------- |
+| <img src="IMG/gmm01.png" alt="displayFeature2D" style="zoom: 67%;" /> | ![displayFeature3D](IMG/gmm02.png) |
 
 
+
+| Img 1973                           | Img 1987                           |
+| ---------------------------------- | ---------------------------------- |
+| ![displayFeature3D](IMG/gmm03.png) | ![displayFeature3D](IMG/gmm04.png) |
 
 
 

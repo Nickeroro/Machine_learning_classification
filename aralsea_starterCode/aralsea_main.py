@@ -26,12 +26,12 @@ featLearn, img73, img87 = preprocessing()
 
 # Apprentissage de la fonction de classement
 # ------------------------------------------------
-model = unsupervisedTraining(featLearn, 'kmeans')
+model = unsupervisedTraining(featLearn, 'gmm')
 # ------------------------------------------------
 
 # prediction des labels sur la base d'apprentissage
 # ------------------------------------------------
-labels = model.labels_
+labels = model.predict(featLearn)
 # ------------------------------------------------
 
 # Visualisation des resultats
